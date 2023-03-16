@@ -10,9 +10,9 @@ import ds_messenger
 
 
 class TestDSmessenger(unittest.TestCase):
-    """Class for testing Calculator."""
+    """Class for testing ds_messenger."""
     def test_direct_send(self):
-        """Test add function."""
+        """Test direct send function."""
         message_to_send = 'Hi, I\'m 10'
         recipient = 'VC1'
         user = ds_messenger.DirectMessenger('168.235.86.101', 'RuizheCheng', 'richard')
