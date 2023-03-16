@@ -12,10 +12,7 @@
 import json
 import time
 from collections import namedtuple
-
-# Namedtuple to hold the values retrieved from json messages.
-# TODO: update this named tuple to use DSP protocol keys
-DataTuple = namedtuple('DataTuple', ['response', 'type', 'message', 'token'])
+DataTuple = namedtuple('DataTuple', ['response', 'type', 'message', 'token', 'messages'])
 
 
 def extract_json(json_msg: str) -> DataTuple:
@@ -24,15 +21,22 @@ def extract_json(json_msg: str) -> DataTuple:
         json_obj = json.loads(json_msg)
         response = json_obj['response']
         type = json_obj['response']['type']
-        message = json_obj['response']['message']
+        if 'message' in json_obj['response']:
+            message = json_obj['response']['message']
+        else:
+            message = None
         if 'token' in json_obj['response']:
             token = json_obj['response']['token']
         else:
             token = None
+        if 'messages' in json_obj['response']:
+            messages = json_obj['response']['messages']
+        else:
+            messages = None
     except json.JSONDecodeError:
         print("Json cannot be decoded.")
     else:
-        return DataTuple(response, type, message, token)
+        return DataTuple(response, type, message, token, messages)
 
 
 def join_action(name, pwd):
@@ -58,6 +62,7 @@ def bio_action(useertoken, bio):
 
 
 def send_direct_message(usertoken, entry, username):
+    """Send direct message to a user."""
     timestamp = time.time()
     dic = {"token": usertoken, "directmessage": {"entry": entry, "recipient": username, "timestamp": timestamp}}
     str1 = json.dumps(dic)
@@ -65,6 +70,7 @@ def send_direct_message(usertoken, entry, username):
 
 
 def request_unread_messages(usertoken):
+    """Request new messages."""
     dic = {"token": usertoken, "directmessage": "new"}
     str1 = json.dumps(dic)
     return str1
