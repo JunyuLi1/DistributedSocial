@@ -136,9 +136,12 @@ class DirectMessenger:
             send = client.makefile('w')
             receive = client.makefile('r')
             mes_obj = DirectMessage()
-            msg = mes_obj.join_action(self.username, self.password)
-            send.write(msg + '\r\n')
+            join_message = mes_obj.join_action(self.username, self.password)
+            send.write(join_message + '\r\n')
             send.flush()
-            resp = receive.readline()
-            returned_token = mes_obj.extract_json(resp).token
-        self.token = returned_token
+            join_message = receive.readline()
+            response = mes_obj.extract_json(join_message).type
+            if response != 'ok':
+                return False
+            else:
+                self.token = mes_obj.extract_json(join_message).token

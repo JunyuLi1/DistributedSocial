@@ -78,6 +78,7 @@ class Profile:
         self.password = password  # REQUIRED
         self.bio = ''            # OPTIONAL
         self._posts = []         # OPTIONAL
+        self.friend_username = {}  # List of username which type is string.
 
     def add_post(self, post: Post) -> None:
         """Add posts."""
@@ -125,8 +126,18 @@ class Profile:
                 for post_obj in obj['_posts']:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)
+                for name_obj in obj['friend_username']:
+                    self.friend_username[name_obj] = []
                 f.close()
             except Exception as ex:
                 raise DsuProfileError(ex)
         else:
             raise DsuFileError()
+
+    def add_friend_username(self, name):
+        """Add friend username locally."""
+        self.friend_username[name] = []
+
+    def add_history_to_username(self, friend_name, content):
+        """Add chat history locally."""
+        self.friend_username[friend_name].append(content)
