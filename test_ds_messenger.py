@@ -15,8 +15,9 @@ class TestDSmessenger(unittest.TestCase):
         """Test direct send function."""
         message_to_send = 'Hi, I\'m 10'
         recipient = 'VC1'
-        user = ds_messenger.DirectMessenger('168.235.86.101', 'RuizheCheng', 'richard')
+        user = ds_messenger.DirectMessenger('168.235.86.101', 'nicaiwoshishei', 'buxiangshuohua')
         returned_result = user.send(message_to_send, recipient)
+        print(returned_result)
         assert returned_result is True
 
     def test_request_new(self):
