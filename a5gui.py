@@ -173,7 +173,7 @@ class MainApp(tk.Frame):
         message = self.body.get_text_entry()
         self.publish(message)
         self.direct_messenger.send(message, self.recipient)
-        #self.check_new()
+        self.check_new()
 
     def add_contact(self):
         # You must implement this!
@@ -194,6 +194,7 @@ class MainApp(tk.Frame):
         content = self.profile_obj.friend_username[recipient]
         for item in content:
             self.body.insert_contact_message(item)
+        self.check_new()
 
     def configure_server(self):
         ud = NewContactDialog(self.root, "Configure Account",
@@ -233,6 +234,7 @@ class MainApp(tk.Frame):
                 print(self.recipient)
                 if item["from"] == self.recipient:
                     self.body.insert_contact_message(item["message"])
+        self.after(1000, self.check_new)
 
     def _draw(self):
         # Build a menu and add it to the root frame.
@@ -280,6 +282,7 @@ class MainApp(tk.Frame):
                 self.profile_obj.add_history_to_username(item['from'], item['message'])
                 self.profile_obj.save_profile(self.path)
         self.profile_obj.save_profile(file_path)
+        self.check_new()
 
     def open_file(self):
         file_path = filedialog.askopenfilename()  # open a file dialog to select a file
@@ -289,6 +292,7 @@ class MainApp(tk.Frame):
             result = self.profile_obj.friend_username.keys()
             for item in result:
                 self.body.insert_contact(item)
+        self.check_new()
 
     def close_file(self):
         # TODO: Implement close file functionality
