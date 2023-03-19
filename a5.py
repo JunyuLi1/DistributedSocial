@@ -11,6 +11,7 @@
 """Module as entry"""
 import sys
 import ui
+import a5gui
 
 
 def main():

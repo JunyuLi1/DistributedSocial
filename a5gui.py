@@ -47,6 +47,10 @@ class Body(tk.Frame):
         self.message_editor.delete(1.0, tk.END)
         self.message_editor.insert(1.0, text)
 
+    def delete_all_contacts(self):
+        self.posts_tree.delete(*self.posts_tree.get_children())
+        self._contacts = []
+
     def _draw(self):
         posts_frame = tk.Frame(master=self, width=250)
         posts_frame.pack(fill=tk.BOTH, side=tk.LEFT)
@@ -194,7 +198,7 @@ class MainApp(tk.Frame):
         content = self.profile_obj.friend_username[recipient]
         for item in content:
             self.body.insert_contact_message(item)
-        self.check_new()
+        #self.check_new()
 
     def configure_server(self):
         ud = NewContactDialog(self.root, "Configure Account",
@@ -268,6 +272,7 @@ class MainApp(tk.Frame):
         file_path = filedialog.asksaveasfilename(defaultextension='.dsu')
         Path(file_path).touch()
         self.path = file_path
+        self.configure_server()
         self.profile_obj.save_profile(file_path)
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
@@ -295,42 +300,42 @@ class MainApp(tk.Frame):
         self.check_new()
 
     def close_file(self):
-        # TODO: Implement close file functionality
-        pass
+        self.body.delete_all_contacts()
+        self.body.entry_editor.delete(1.0, tk.END)
+        self.body.message_editor.delete(1.0, tk.END)
+        self.path = ''
 
+# All Tkinter programs start with a root window. We will name ours 'main'.
+main = tk.Tk()
 
-if __name__ == "__main__":
-    # All Tkinter programs start with a root window. We will name ours 'main'.
-    main = tk.Tk()
+# 'title' assigns a text value to the Title Bar area of a window.
+main.title("ICS 32 Distributed Social Messenger")
 
-    # 'title' assigns a text value to the Title Bar area of a window.
-    main.title("ICS 32 Distributed Social Messenger")
+# This is just an arbitrary starting point. You can change the value
+# around to see how the starting size of the window changes.
+main.geometry("720x480")
 
-    # This is just an arbitrary starting point. You can change the value
-    # around to see how the starting size of the window changes.
-    main.geometry("720x480")
+# adding this option removes some legacy behavior with menus that
+# some modern OSes don't support. If you're curious, feel free to comment
+# out and see how the menu changes.
+main.option_add('*tearOff', False)
 
-    # adding this option removes some legacy behavior with menus that
-    # some modern OSes don't support. If you're curious, feel free to comment
-    # out and see how the menu changes.
-    main.option_add('*tearOff', False)
+# Initialize the MainApp class, which is the starting point for the
+# widgets used in the program. All of the classes that we use,
+# subclass Tk.Frame, since our root frame is main, we initialize
+# the class with it.
+app = MainApp(main)
 
-    # Initialize the MainApp class, which is the starting point for the
-    # widgets used in the program. All of the classes that we use,
-    # subclass Tk.Frame, since our root frame is main, we initialize
-    # the class with it.
-    app = MainApp(main)
-
-    # When update is called, we finalize the states of all widgets that
-    # have been configured within the root frame. Here, update ensures that
-    # we get an accurate width and height reading based on the types of widgets
-    # we have used. minsize prevents the root window from resizing too small.
-    # Feel free to comment it out and see how the resizing
-    # behavior of the window changes.
-    main.update()
-    main.minsize(main.winfo_width(), main.winfo_height())
-    id = main.after(2000, app.check_new)
-    print(id)
-    # And finally, start up the event loop for the program (you can find
-    # more on this in lectures of week 9 and 10).
-    main.mainloop()
+# When update is called, we finalize the states of all widgets that
+# have been configured within the root frame. Here, update ensures that
+# we get an accurate width and height reading based on the types of widgets
+# we have used. minsize prevents the root window from resizing too small.
+# Feel free to comment it out and see how the resizing
+# behavior of the window changes.
+main.update()
+main.minsize(main.winfo_width(), main.winfo_height())
+id = main.after(2000, app.check_new)
+print(id)
+# And finally, start up the event loop for the program (you can find
+# more on this in lectures of week 9 and 10).
+main.mainloop()
