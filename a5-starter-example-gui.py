@@ -152,15 +152,16 @@ class MainApp(tk.Frame):
     def __init__(self, root):
         tk.Frame.__init__(self, root)
         self.root = root
-        self.username = ''
-        self.password = ''
-        self.server = ''
+        self.username = 'VC1'
+        self.password = 'VC'
+        self.server = '168.235.86.101'
         self.recipient = ''
         # You must implement this! You must configure and
         # instantiate your DirectMessenger instance after this line.
         #self.direct_messenger = ... continue!
         self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
         self.profile_obj = Profile.Profile()
+        self.path = ''
         # After all initialization is complete,
         # call the _draw method to pack the widgets
         # into the root frame
@@ -171,7 +172,9 @@ class MainApp(tk.Frame):
         # You must implement this!
         message = self.body.get_text_entry()
         self.publish(message)
-        #self.body.set_text_entry(message)
+        # TODO: get recipient that user selected and call recipient_selected
+        #self.recipient_selected('superhammer')
+        self.direct_messenger.send(message, self.recipient)
 
     def add_contact(self):
         # You must implement this!
@@ -183,7 +186,12 @@ class MainApp(tk.Frame):
             self.body.insert_contact(name)
 
     def recipient_selected(self, recipient):
+        # TODO:清空非此联系人的过往并加载新的recipient过往消息
         self.recipient = recipient
+        self.profile_obj.load_profile(self.path)
+        content = self.profile_obj.friend_username[recipient]
+        for item in content:
+            self.body.insert_contact_message(item)
 
     def configure_server(self):
         ud = NewContactDialog(self.root, "Configure Account",
@@ -196,13 +204,17 @@ class MainApp(tk.Frame):
         # DirectMessenger instance after this line.
         print(self.server, self.password, self.username)
         self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
+        """self.profile_obj.dsuserver = self.server
+        self.profile_obj.username = self.username
+        self.profile_obj.password = self.password
+        self.profile_obj.save_profile(self.path)"""
 
     def publish(self, message: str):
         # You must implement this!
         self.body.insert_user_message(message)
 
     def check_new(self):
-        # You must implement this!
+        # TODO: You must implement this!
         new_message_list = self.direct_messenger.retrieve_new()
         print(new_message_list)
 
@@ -237,6 +249,7 @@ class MainApp(tk.Frame):
         # Open a file dialog to specify the file name and location to save the new file
         file_path = filedialog.asksaveasfilename(defaultextension='.dsu')
         Path(file_path).touch()
+        self.path = file_path
         self.profile_obj.save_profile(file_path)
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
@@ -245,14 +258,12 @@ class MainApp(tk.Frame):
 
     def open_file(self):
         file_path = filedialog.askopenfilename()  # open a file dialog to select a file
+        self.path = file_path
         if file_path:
             self.profile_obj.load_profile(file_path)
             result = self.profile_obj.friend_username.keys()
             for item in result:  # TODO:在这里显示过去的
                 self.body.insert_contact(item)
-                content = self.profile_obj.friend_username[item]
-                for item in content:
-                    self.body.insert_contact_message(item)
 
     def close_file(self):
         # TODO: Implement close file functionality
