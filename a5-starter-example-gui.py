@@ -173,7 +173,6 @@ class MainApp(tk.Frame):
         message = self.body.get_text_entry()
         self.publish(message)
         # TODO: get recipient that user selected and call recipient_selected
-        #self.recipient_selected('superhammer')
         self.direct_messenger.send(message, self.recipient)
 
     def add_contact(self):
@@ -187,9 +186,11 @@ class MainApp(tk.Frame):
 
     def recipient_selected(self, recipient):
         # TODO:清空非此联系人的过往并加载新的recipient过往消息
+        self.body.entry_editor.delete(1.0, tk.END)
         self.recipient = recipient
         self.profile_obj.load_profile(self.path)
         content = self.profile_obj.friend_username[recipient]
+        print(content)
         for item in content:
             self.body.insert_contact_message(item)
 
@@ -204,19 +205,19 @@ class MainApp(tk.Frame):
         # DirectMessenger instance after this line.
         print(self.server, self.password, self.username)
         self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
-        """self.profile_obj.dsuserver = self.server
+        self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
-        self.profile_obj.save_profile(self.path)"""
+        self.profile_obj.save_profile(self.path)
 
     def publish(self, message: str):
         # You must implement this!
         self.body.insert_user_message(message)
+        self.body.message_editor.delete(1.0, tk.END)
 
     def check_new(self):
         # TODO: You must implement this!
-        new_message_list = self.direct_messenger.retrieve_new()
-        print(new_message_list)
+        pass
 
     def _draw(self):
         # Build a menu and add it to the root frame.
@@ -267,7 +268,7 @@ class MainApp(tk.Frame):
 
     def close_file(self):
         # TODO: Implement close file functionality
-        self.root.destroy()  # destroy the root window, effectively closing the app
+        pass
 
 
 if __name__ == "__main__":

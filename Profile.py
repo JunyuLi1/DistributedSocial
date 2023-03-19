@@ -126,8 +126,8 @@ class Profile:
                 for post_obj in obj['_posts']:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)
-                for name_obj in obj['friend_username']:
-                    self.friend_username[name_obj] = []
+                if 'friend_username' in obj:
+                    self.friend_username = obj['friend_username']
                 f.close()
             except Exception as ex:
                 raise DsuProfileError(ex)
