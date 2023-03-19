@@ -152,9 +152,9 @@ class MainApp(tk.Frame):
     def __init__(self, root):
         tk.Frame.__init__(self, root)
         self.root = root
-        self.username = 'VC1'
-        self.password = 'VC'
-        self.server = '168.235.86.101'
+        self.username = ''
+        self.password = ''
+        self.server = ''
         self.recipient = ''
         # You must implement this! You must configure and
         # instantiate your DirectMessenger instance after this line.
@@ -172,8 +172,8 @@ class MainApp(tk.Frame):
         # You must implement this!
         message = self.body.get_text_entry()
         self.publish(message)
-        # TODO: get recipient that user selected and call recipient_selected
         self.direct_messenger.send(message, self.recipient)
+        #self.check_new()
 
     def add_contact(self):
         # You must implement this!
@@ -187,10 +187,11 @@ class MainApp(tk.Frame):
     def recipient_selected(self, recipient):
         # TODO:清空非此联系人的过往并加载新的recipient过往消息
         self.body.entry_editor.delete(1.0, tk.END)
+        self.body.message_editor.delete(1.0, tk.END)
         self.recipient = recipient
         self.profile_obj.load_profile(self.path)
+        self.profile_obj.load_profile(self.path)
         content = self.profile_obj.friend_username[recipient]
-        print(content)
         for item in content:
             self.body.insert_contact_message(item)
 
@@ -216,8 +217,22 @@ class MainApp(tk.Frame):
         self.body.message_editor.delete(1.0, tk.END)
 
     def check_new(self):
-        # TODO: You must implement this!
-        pass
+        # TODO: You must implement this! 实时显示
+        new_data = self.direct_messenger.retrieve_new()
+        if len(new_data) > 0:
+            self.profile_obj.load_profile(self.path)
+            for item in new_data:
+                if item['from'] not in self.profile_obj.friend_username:
+                    self.profile_obj.add_friend_username(item['from'])
+                    self.profile_obj.add_history_to_username(item['from'], item['message'])
+                    self.profile_obj.save_profile(self.path)
+                else:
+                    self.profile_obj.add_history_to_username(item['from'], item['message'])
+                    self.profile_obj.save_profile(self.path)
+            for item in new_data:
+                print(self.recipient)
+                if item["from"] == self.recipient:
+                    self.body.insert_contact_message(item["message"])
 
     def _draw(self):
         # Build a menu and add it to the root frame.
@@ -246,7 +261,7 @@ class MainApp(tk.Frame):
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
 
     def new_file(self):
-        # TODO: Implement new file functionality
+        # TODO: Implement new file functionality retrive_all
         # Open a file dialog to specify the file name and location to save the new file
         file_path = filedialog.asksaveasfilename(defaultextension='.dsu')
         Path(file_path).touch()
@@ -255,6 +270,15 @@ class MainApp(tk.Frame):
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
+        past_data = self.direct_messenger.retrieve_all()
+        for item in past_data:
+            if item['from'] not in self.profile_obj.friend_username:
+                self.profile_obj.add_friend_username(item['from'])
+                self.profile_obj.add_history_to_username(item['from'], item['message'])
+                self.profile_obj.save_profile(self.path)
+            else:
+                self.profile_obj.add_history_to_username(item['from'], item['message'])
+                self.profile_obj.save_profile(self.path)
         self.profile_obj.save_profile(file_path)
 
     def open_file(self):
@@ -263,7 +287,7 @@ class MainApp(tk.Frame):
         if file_path:
             self.profile_obj.load_profile(file_path)
             result = self.profile_obj.friend_username.keys()
-            for item in result:  # TODO:在这里显示过去的
+            for item in result:
                 self.body.insert_contact(item)
 
     def close_file(self):
