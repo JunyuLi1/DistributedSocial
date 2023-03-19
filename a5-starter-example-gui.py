@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from typing import Text
-
+from tkinter import simpledialog
+import ds_messenger
+import Profile
 
 class Body(tk.Frame):
     def __init__(self, root, recipient_selected_callback=None):
@@ -97,6 +99,7 @@ class Footer(tk.Frame):
         # You must implement this.
         # Here you must configure the button to bind its click to
         # the send_click() function.
+        save_button.config(command=self.send_click)
         save_button.pack(fill=tk.BOTH, side=tk.RIGHT, padx=5, pady=5)
 
         self.footer_label = tk.Label(master=self, text="Ready.")
@@ -130,6 +133,11 @@ class NewContactDialog(tk.simpledialog.Dialog):
         # such that when the user types, the only thing that appears are
         # * symbols.
         #self.password...
+        self.password_label = tk.Label(frame, width=30, text="Password")
+        self.password_label.pack()
+        self.password_entry = tk.Entry(frame, width=30, show='*')
+        self.password_entry.insert(tk.END, self.user)
+        self.password_entry.pack()
 
 
     def apply(self):
@@ -142,30 +150,33 @@ class MainApp(tk.Frame):
     def __init__(self, root):
         tk.Frame.__init__(self, root)
         self.root = root
-        self.username = None
-        self.password = None
-        self.server = None
-        self.recipient = None
+        self.username = 'VC1'
+        self.password = 'VC'
+        self.server = '168.235.86.101'
+        self.recipient = 'RuizheCheng'
         # You must implement this! You must configure and
         # instantiate your DirectMessenger instance after this line.
         #self.direct_messenger = ... continue!
-
+        self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
+        self.profile_obj = Profile.Profile()
         # After all initialization is complete,
         # call the _draw method to pack the widgets
         # into the root frame
         self._draw()
-        self.body.insert_contact("studentexw23") # adding one example student.
+        self.body.insert_contact("studentexw23")  # adding one example student.
 
     def send_message(self):
         # You must implement this!
-        pass
+        self.direct_messenger.send('shabi', self.recipient)
 
     def add_contact(self):
         # You must implement this!
         # Hint: check how to use tk.simpledialog.askstring to retrieve
         # the name of the new contact, and then use one of the body
         # methods to add the contact to your contact list
-        pass
+        name = tk.simpledialog.askstring(title="Input", prompt="Enter a username:")
+        if name is not None:
+            self.body.insert_contact(name)
 
     def recipient_selected(self, recipient):
         self.recipient = recipient
@@ -179,10 +190,12 @@ class MainApp(tk.Frame):
         # You must implement this!
         # You must configure and instantiate your
         # DirectMessenger instance after this line.
+        print(self.server, self.password, self.username)
+        self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
 
     def publish(self, message:str):
         # You must implement this!
-        pass
+        self.body.insert_user_message(message)
 
     def check_new(self):
         # You must implement this!
@@ -195,9 +208,9 @@ class MainApp(tk.Frame):
         menu_file = tk.Menu(menu_bar)
 
         menu_bar.add_cascade(menu=menu_file, label='File')
-        menu_file.add_command(label='New')
-        menu_file.add_command(label='Open...')
-        menu_file.add_command(label='Close')
+        menu_file.add_command(label='New', command=self.new_file)
+        menu_file.add_command(label='Open...', command=self.open_file)
+        menu_file.add_command(label='Close', command=self.close_file)
 
         settings_file = tk.Menu(menu_bar)
         menu_bar.add_cascade(menu=settings_file, label='Settings')
@@ -213,6 +226,24 @@ class MainApp(tk.Frame):
         self.body.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
         self.footer = Footer(self.root, send_callback=self.send_message)
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
+
+    def new_file(self):
+        # TODO: Implement new file functionality
+        self.body.clear()  # clears the body of the app
+        self.footer.clear()  # clears the footer of the app
+
+    def open_file(self):
+        # TODO: Implement open file functionality
+        file_path = filedialog.askopenfilename()  # open a file dialog to select a file
+        if file_path:
+            self.profile_obj.load_profile(file_path)
+            result = self.profile_obj.friend_username.keys()
+            for item in result:
+                self.body.insert_contact(item)
+
+    def close_file(self):
+        # TODO: Implement close file functionality
+        self.root.destroy()  # destroy the root window, effectively closing the app
 
 
 if __name__ == "__main__":
