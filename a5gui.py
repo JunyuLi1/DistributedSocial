@@ -323,7 +323,6 @@ class MainApp(tk.Frame):
         self.body._contacts = []
 
 
-
 if __name__ == '__main__':
     # All Tkinter programs start with a root window. We will name ours 'main'.
     main = ThemedTk(theme="yaru")
