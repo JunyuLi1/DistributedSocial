@@ -136,7 +136,7 @@ class Profile:
 
     def extract_for_directmessage(self, lis_of_objects):
         for item in lis_of_objects:
-            if item.recipient not in self.friend_username:
+            if item.recipient not in self.friend_username.keys():
                 self.add_friend_username(item.recipient)
                 self.add_history_to_username(item.recipient, item.message)
             else:

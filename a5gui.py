@@ -234,17 +234,14 @@ class MainApp(tk.Frame):
     def check_new(self):
         new_data = self.direct_messenger.retrieve_new()
         if len(new_data) > 0:
+            self.profile_obj.load_profile(self.path)
+            self.profile_obj.extract_for_directmessage(new_data)
+            self.profile_obj.save_profile(self.path)
             for item in new_data:
                 if item.recipient == self.recipient:
                     self.body.insert_contact_message(item.message)
-                    self.profile_obj.load_profile(self.path)
-                    self.profile_obj.extract_for_directmessage(new_data)
-                    self.profile_obj.save_profile(self.path)
                 if item.recipient not in self.body._contacts:
                     self.body.insert_contact(item.recipient)
-                    self.profile_obj.load_profile(self.path)
-                    self.profile_obj.extract_for_directmessage(new_data)
-                    self.profile_obj.save_profile(self.path)
         self.after(1000, self.check_new)
 
     def _draw(self):
@@ -280,17 +277,15 @@ class MainApp(tk.Frame):
         Path(file_path).touch()
         self.path = file_path
         self.configure_server()
-        self.profile_obj.save_profile(self.path)
+        self.profile_obj.load_profile(self.path)
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
+        self.profile_obj.save_profile(self.path)
         past_data = self.direct_messenger.retrieve_all()
         self.profile_obj.load_profile(self.path)
         self.profile_obj.extract_for_directmessage(past_data)
         self.profile_obj.save_profile(self.path)
-        result = self.profile_obj.friend_username.keys()
-        for item in result:
-            self.body.insert_contact(item)
         self.check_new()
 
     def open_file(self):
