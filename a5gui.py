@@ -34,16 +34,16 @@ class Body(tk.Frame):
             entry = contact[:24] + "..."
         id = self.posts_tree.insert('', id, id, text=contact)
 
-    def insert_user_message(self, message:str):
-        self.entry_editor.insert(1.0, message + '\n', 'entry-right')  #replaced tk.END
+    def insert_user_message(self, message: str):
+        self.entry_editor.insert(1.0, message + '\n', 'entry-right')  # replaced tk.END
 
-    def insert_contact_message(self, message:str):
+    def insert_contact_message(self, message: str):
         self.entry_editor.insert(1.0, message + '\n', 'entry-left')
 
     def get_text_entry(self) -> str:
         return self.message_editor.get('1.0', 'end').rstrip()
 
-    def set_text_entry(self, text:str):
+    def set_text_entry(self, text: str):
         self.message_editor.delete(1.0, tk.END)
         self.message_editor.insert(1.0, text)
 
@@ -60,7 +60,8 @@ class Body(tk.Frame):
         self.posts_tree.pack(fill=tk.BOTH, side=tk.TOP,
                              expand=True, padx=5, pady=5)
 
-        entry_frame = tk.Frame(master=self, bg="")
+        entry_frame = tk.Frame(master=self, bg="green", highlightthickness=2)
+        entry_frame.configure(highlightcolor='green', highlightbackground='green')
         entry_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
 
         editor_frame = tk.Frame(master=entry_frame, bg="red")
@@ -138,13 +139,12 @@ class NewContactDialog(tk.simpledialog.Dialog):
         # but you will want to add self.password_entry['show'] = '*'
         # such that when the user types, the only thing that appears are
         # * symbols.
-        #self.password...
+        # self.password...
         self.password_label = tk.Label(frame, width=30, text="Password")
         self.password_label.pack()
         self.password_entry = tk.Entry(frame, width=30, show='*')
         self.password_entry.insert(tk.END, self.user)
         self.password_entry.pack()
-
 
     def apply(self):
         self.user = self.username_entry.get()
@@ -162,7 +162,7 @@ class MainApp(tk.Frame):
         self.recipient = ''
         # You must implement this! You must configure and
         # instantiate your DirectMessenger instance after this line.
-        #self.direct_messenger = ... continue!
+        # self.direct_messenger = ... continue!
         self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
         self.profile_obj = Profile.Profile()
         self.path = ''
@@ -170,7 +170,6 @@ class MainApp(tk.Frame):
         # call the _draw method to pack the widgets
         # into the root frame
         self._draw()
-        #self.body.insert_contact("studentexw23")  # adding one example student.
 
     def send_message(self):
         # You must implement this!
@@ -238,6 +237,9 @@ class MainApp(tk.Frame):
             for item in new_data:
                 if item.recipient == self.recipient:
                     self.body.insert_contact_message(item.message)
+                    self.profile_obj.load_profile(self.path)
+                    self.profile_obj.extract_for_directmessage(new_data)
+                    self.profile_obj.save_profile(self.path)
                 if item.recipient not in self.body._contacts:
                     self.body.insert_contact(item.recipient)
                     self.profile_obj.load_profile(self.path)
