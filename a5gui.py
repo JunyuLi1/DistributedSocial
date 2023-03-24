@@ -197,9 +197,14 @@ class MainApp(tk.Frame):
         content = self.profile_obj.friend_username[recipient]
         for item in content:
             self.body.insert_contact_message(item)
-        #self.check_new()
 
     def configure_server(self):
+        self.body.delete_all_contacts()
+        self.body.entry_editor.delete(1.0, tk.END)
+        self.body.message_editor.delete(1.0, tk.END)
+        self.body._contacts = []
+        self.profile_obj.friend_username = {}
+        self.profile_obj.save_profile(self.path)
         ud = NewContactDialog(self.root, "Configure Account",
                               self.username, self.password, self.server)
         self.username = ud.user
@@ -212,7 +217,15 @@ class MainApp(tk.Frame):
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
+        past_data = self.direct_messenger.retrieve_all()
+        self.profile_obj.load_profile(self.path)
+        self.profile_obj.extract_for_directmessage(past_data)
         self.profile_obj.save_profile(self.path)
+        result = self.profile_obj.friend_username.keys()
+        for item in result:
+            self.body.insert_contact(item)
+        self.profile_obj.save_profile(self.path)
+        self.check_new()
 
     def publish(self, message: str):
         # You must implement this!
@@ -260,16 +273,7 @@ class MainApp(tk.Frame):
 
     def new_file(self):
         # Open a file dialog to specify the file name and location to save the new file
-        self.body.delete_all_contacts()
-        self.body.entry_editor.delete(1.0, tk.END)
-        self.body.message_editor.delete(1.0, tk.END)
-        self.path = ''
-        self.server = ''
-        self.username = ''
-        self.password = ''
-        self.recipient = ''
-        self.body._contacts = []
-        self.profile_obj = Profile.Profile()
+        self.clear()
         file_path = filedialog.asksaveasfilename(defaultextension='.dsu')
         Path(file_path).touch()
         self.path = file_path
@@ -288,16 +292,7 @@ class MainApp(tk.Frame):
         self.check_new()
 
     def open_file(self):
-        self.body.delete_all_contacts()
-        self.body.entry_editor.delete(1.0, tk.END)
-        self.body.message_editor.delete(1.0, tk.END)
-        self.path = ''
-        self.server = ''
-        self.username = ''
-        self.password = ''
-        self.recipient = ''
-        self.profile_obj = Profile.Profile()
-        self.body._contacts = []
+        self.clear()
         file_path = filedialog.askopenfilename()  # open a file dialog to select a file
         self.path = file_path
         if file_path:
@@ -314,6 +309,19 @@ class MainApp(tk.Frame):
 
     def close_file(self):
         self.root.destroy()
+
+    def clear(self):
+        self.body.delete_all_contacts()
+        self.body.entry_editor.delete(1.0, tk.END)
+        self.body.message_editor.delete(1.0, tk.END)
+        self.path = ''
+        self.server = ''
+        self.username = ''
+        self.password = ''
+        self.recipient = ''
+        self.profile_obj = Profile.Profile()
+        self.body._contacts = []
+
 
 
 if __name__ == '__main__':
