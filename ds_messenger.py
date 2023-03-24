@@ -5,6 +5,7 @@
 # Junyu Li
 # junyul24@uci.edu
 # 86676906
+"""A module of ds_messenger.py"""
 import socket
 import time
 import json
@@ -128,7 +129,15 @@ class DirectMessenger:
             if response != 'ok':
                 return False
             else:
-                return mess_obj.extract_json(join_message).messages
+                message_lis = mess_obj.extract_json(join_message).messages
+                new_lis = []
+                for item in message_lis:
+                    obj = DirectMessage()
+                    obj.message = item["message"]
+                    obj.recipient = item["from"]
+                    obj.timestamp = item["timestamp"]
+                    new_lis.append(obj)
+                return new_lis
 
     def get_token(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:

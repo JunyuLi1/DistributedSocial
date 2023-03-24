@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
-from typing import Text
 from tkinter import simpledialog
 import ds_messenger
 import Profile
 from pathlib import Path
+from ttkthemes import ThemedTk
 
 
 class Body(tk.Frame):
@@ -35,7 +35,7 @@ class Body(tk.Frame):
         id = self.posts_tree.insert('', id, id, text=contact)
 
     def insert_user_message(self, message:str):
-        self.entry_editor.insert(1.0, message + '\n', 'entry-right')
+        self.entry_editor.insert(1.0, message + '\n', 'entry-right')  #replaced tk.END
 
     def insert_contact_message(self, message:str):
         self.entry_editor.insert(1.0, message + '\n', 'entry-left')
@@ -189,7 +189,6 @@ class MainApp(tk.Frame):
             self.body.insert_contact(name)
 
     def recipient_selected(self, recipient):
-        # TODO:清空非此联系人的过往并加载新的recipient过往消息
         self.body.entry_editor.delete(1.0, tk.END)
         self.body.message_editor.delete(1.0, tk.END)
         self.recipient = recipient
@@ -209,7 +208,6 @@ class MainApp(tk.Frame):
         # You must implement this!
         # You must configure and instantiate your
         # DirectMessenger instance after this line.
-        print(self.server, self.password, self.username)
         self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
@@ -222,22 +220,16 @@ class MainApp(tk.Frame):
         self.body.message_editor.delete(1.0, tk.END)
 
     def check_new(self):
-        # TODO: You must implement this! 实时显示
         new_data = self.direct_messenger.retrieve_new()
         if len(new_data) > 0:
-            self.profile_obj.load_profile(self.path)
             for item in new_data:
-                if item['from'] not in self.profile_obj.friend_username:
-                    self.profile_obj.add_friend_username(item['from'])
-                    self.profile_obj.add_history_to_username(item['from'], item['message'])
+                if item.recipient == self.recipient:
+                    self.body.insert_contact_message(item.message)
+                if item.recipient not in self.body._contacts:
+                    self.body.insert_contact(item.recipient)
+                    self.profile_obj.load_profile(self.path)
+                    self.profile_obj.extract_for_directmessage(new_data)
                     self.profile_obj.save_profile(self.path)
-                else:
-                    self.profile_obj.add_history_to_username(item['from'], item['message'])
-                    self.profile_obj.save_profile(self.path)
-            for item in new_data:
-                print(self.recipient)
-                if item["from"] == self.recipient:
-                    self.body.insert_contact_message(item["message"])
         self.after(1000, self.check_new)
 
     def _draw(self):
@@ -267,29 +259,45 @@ class MainApp(tk.Frame):
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
 
     def new_file(self):
-        # TODO: Implement new file functionality retrive_all
         # Open a file dialog to specify the file name and location to save the new file
+        self.body.delete_all_contacts()
+        self.body.entry_editor.delete(1.0, tk.END)
+        self.body.message_editor.delete(1.0, tk.END)
+        self.path = ''
+        self.server = ''
+        self.username = ''
+        self.password = ''
+        self.recipient = ''
+        self.body._contacts = []
+        self.profile_obj = Profile.Profile()
         file_path = filedialog.asksaveasfilename(defaultextension='.dsu')
         Path(file_path).touch()
         self.path = file_path
         self.configure_server()
-        self.profile_obj.save_profile(file_path)
+        self.profile_obj.save_profile(self.path)
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
         past_data = self.direct_messenger.retrieve_all()
-        for item in past_data:
-            if item['from'] not in self.profile_obj.friend_username:
-                self.profile_obj.add_friend_username(item['from'])
-                self.profile_obj.add_history_to_username(item['from'], item['message'])
-                self.profile_obj.save_profile(self.path)
-            else:
-                self.profile_obj.add_history_to_username(item['from'], item['message'])
-                self.profile_obj.save_profile(self.path)
-        self.profile_obj.save_profile(file_path)
+        self.profile_obj.load_profile(self.path)
+        self.profile_obj.extract_for_directmessage(past_data)
+        self.profile_obj.save_profile(self.path)
+        result = self.profile_obj.friend_username.keys()
+        for item in result:
+            self.body.insert_contact(item)
         self.check_new()
 
     def open_file(self):
+        self.body.delete_all_contacts()
+        self.body.entry_editor.delete(1.0, tk.END)
+        self.body.message_editor.delete(1.0, tk.END)
+        self.path = ''
+        self.server = ''
+        self.username = ''
+        self.password = ''
+        self.recipient = ''
+        self.profile_obj = Profile.Profile()
+        self.body._contacts = []
         file_path = filedialog.askopenfilename()  # open a file dialog to select a file
         self.path = file_path
         if file_path:
@@ -297,45 +305,49 @@ class MainApp(tk.Frame):
             result = self.profile_obj.friend_username.keys()
             for item in result:
                 self.body.insert_contact(item)
+                self.body._contacts.append(item)
+        self.server = self.profile_obj.dsuserver
+        self.username = self.profile_obj.username
+        self.password = self.profile_obj.password
+        self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
         self.check_new()
 
     def close_file(self):
-        self.body.delete_all_contacts()
-        self.body.entry_editor.delete(1.0, tk.END)
-        self.body.message_editor.delete(1.0, tk.END)
-        self.path = ''
+        self.root.destroy()
 
-# All Tkinter programs start with a root window. We will name ours 'main'.
-main = tk.Tk()
 
-# 'title' assigns a text value to the Title Bar area of a window.
-main.title("ICS 32 Distributed Social Messenger")
+if __name__ == '__main__':
+    # All Tkinter programs start with a root window. We will name ours 'main'.
+    main = ThemedTk(theme="yaru")
 
-# This is just an arbitrary starting point. You can change the value
-# around to see how the starting size of the window changes.
-main.geometry("720x480")
+    # 'title' assigns a text value to the Title Bar area of a window.
+    main.title("ICS 32 Distributed Social Messenger")
 
-# adding this option removes some legacy behavior with menus that
-# some modern OSes don't support. If you're curious, feel free to comment
-# out and see how the menu changes.
-main.option_add('*tearOff', False)
+    # This is just an arbitrary starting point. You can change the value
+    # around to see how the starting size of the window changes.
+    main.geometry("720x480")
 
-# Initialize the MainApp class, which is the starting point for the
-# widgets used in the program. All of the classes that we use,
-# subclass Tk.Frame, since our root frame is main, we initialize
-# the class with it.
-app = MainApp(main)
+    # adding this option removes some legacy behavior with menus that
+    # some modern OSes don't support. If you're curious, feel free to comment
+    # out and see how the menu changes.
+    main.option_add('*tearOff', False)
 
-# When update is called, we finalize the states of all widgets that
-# have been configured within the root frame. Here, update ensures that
-# we get an accurate width and height reading based on the types of widgets
-# we have used. minsize prevents the root window from resizing too small.
-# Feel free to comment it out and see how the resizing
-# behavior of the window changes.
-main.update()
-main.minsize(main.winfo_width(), main.winfo_height())
-id = main.after(2000, app.check_new)
-print(id)
-# And finally, start up the event loop for the program (you can find
-# more on this in lectures of week 9 and 10).
-main.mainloop()
+    # Initialize the MainApp class, which is the starting point for the
+    # widgets used in the program. All of the classes that we use,
+    # subclass Tk.Frame, since our root frame is main, we initialize
+    # the class with it.
+    app = MainApp(main)
+
+    # When update is called, we finalize the states of all widgets that
+    # have been configured within the root frame. Here, update ensures that
+    # we get an accurate width and height reading based on the types of widgets
+    # we have used. minsize prevents the root window from resizing too small.
+    # Feel free to comment it out and see how the resizing
+    # behavior of the window changes.
+    main.update()
+    main.minsize(main.winfo_width(), main.winfo_height())
+    id = main.after(2000, app.check_new)
+    print(id)
+    # And finally, start up the event loop for the program (you can find
+    # more on this in lectures of week 9 and 10).
+    main.mainloop()

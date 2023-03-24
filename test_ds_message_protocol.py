@@ -26,8 +26,8 @@ class TestDSmessenger(unittest.TestCase):
     """Class for testing ds_protocol."""
     def test_send_direct_protocol(self):
         """Test direct_send protocol function."""
-        usertoken = '54559cc3-334b-4fd2-ac4d-5dd0462c3f15'
-        entry = 'Hi from VC'
+        usertoken = '6e79a5fd-2b96-4c48-8ae5-938c8dbb0e54'
+        entry = 'Hi from 10'
         username = 'VC1'
         test_message = ds_protocol.send_direct_message(usertoken, entry, username)
         returned_result = ds_protocol.extract_json(simple_client(test_message)).type

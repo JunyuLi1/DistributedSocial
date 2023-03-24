@@ -20,7 +20,7 @@
 import json
 import time
 from pathlib import Path
-
+import ds_messenger
 
 class DsuFileError(Exception):
     """Defile an exception."""
@@ -133,6 +133,14 @@ class Profile:
                 raise DsuProfileError(ex)
         else:
             raise DsuFileError()
+
+    def extract_for_directmessage(self, lis_of_objects):
+        for item in lis_of_objects:
+            if item.recipient not in self.friend_username:
+                self.add_friend_username(item.recipient)
+                self.add_history_to_username(item.recipient, item.message)
+            else:
+                self.add_history_to_username(item.recipient, item.message)
 
     def add_friend_username(self, name):
         """Add friend username locally."""
