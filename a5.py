@@ -224,6 +224,7 @@ class MainApp(tk.Frame):
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
+        self.profile_obj.save_profile(self.path)
         past_data = self.direct_messenger.retrieve_all()
         self.profile_obj.load_profile(self.path)
         self.profile_obj.extract_for_directmessage(past_data)
