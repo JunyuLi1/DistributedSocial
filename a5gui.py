@@ -322,7 +322,7 @@ class MainApp(tk.Frame):
 
 if __name__ == '__main__':
     # All Tkinter programs start with a root window. We will name ours 'main'.
-    main = ThemedTk(theme="yaru")
+    main = ThemedTk(theme="clearlooks")
 
     # 'title' assigns a text value to the Title Bar area of a window.
     main.title("ICS 32 Distributed Social Messenger")
