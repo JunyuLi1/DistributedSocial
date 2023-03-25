@@ -8,6 +8,7 @@
 """Module for test ds protocol."""
 import unittest
 import socket
+import json
 import ds_protocol
 
 
@@ -22,6 +23,15 @@ def simple_client(message, address='168.235.86.101', port=3021):
         send.flush()
         resp = receive.readline()
         return resp
+
+
+def is_json(data):
+    """test json format."""
+    try:
+        json.loads(data)
+        return True
+    except ValueError:
+        return False
 
 
 class TestDSmessenger(unittest.TestCase):
@@ -52,6 +62,32 @@ class TestDSmessenger(unittest.TestCase):
         returned_result = \
             ds_protocol.extract_json(simple_client(test_message)).type
         assert returned_result == 'ok'
+
+    def test_join_action(self):
+        """Test join action."""
+        result = ds_protocol.join_action('VC1', 'VC')
+        assert is_json(result)
+
+    def test_post_action(self):
+        """Test join post."""
+        result = ds_protocol.post_action(
+            '54559cc3-334b-4fd2-ac4d-5dd0462c3f15', 'Hi VC')
+        assert is_json(result)
+
+    def test_bio_action(self):
+        """Test join post."""
+        result = ds_protocol.bio_action(
+            '54559cc3-334b-4fd2-ac4d-5dd0462c3f15', 'Bio of VC')
+        assert is_json(result)
+
+    def test_extract_json(self):
+        """Test extract json."""
+        message = '{"response": ' \
+                  '{"type": "ok", "message": ' \
+                  '"Welcome back, math3a", "token": ' \
+                  '"9f360cbd-aea0-438b-bb04-122600409581"}}'
+        result = ds_protocol.extract_json(message)
+        assert isinstance(result, tuple)
 
 
 if __name__ == "__main__":
