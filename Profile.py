@@ -20,7 +20,7 @@
 import json
 import time
 from pathlib import Path
-import ds_messenger
+
 
 class DsuFileError(Exception):
     """Defile an exception."""
@@ -98,27 +98,27 @@ class Profile:
 
     def save_profile(self, path: str) -> None:
         """Save profile."""
-        p = Path(path)
+        path = Path(path)
 
-        if p.exists() and p.suffix == '.dsu':
+        if path.exists() and path.suffix == '.dsu':
             try:
-                f = open(p, 'w')
-                json.dump(self.__dict__, f)
-                f.close()
-            except Exception as ex:
+                file = open(path, 'w')
+                json.dump(self.__dict__, file)
+                file.close()
+            except Exception as exc:
                 raise DsuFileError("Error while attempting "
-                                   "to process the DSU file.", ex)
+                                   "to process the DSU file.") from exc
         else:
             raise DsuFileError("Invalid DSU file path or type")
 
     def load_profile(self, path: str) -> None:
         """Load profile."""
-        p = Path(path)
+        path = Path(path)
 
-        if p.exists() and p.suffix == '.dsu':
+        if path.exists() and path.suffix == '.dsu':
             try:
-                f = open(p, 'r')
-                obj = json.load(f)
+                file = open(path, 'r')
+                obj = json.load(file)
                 self.username = obj['username']
                 self.password = obj['password']
                 self.dsuserver = obj['dsuserver']
@@ -128,13 +128,14 @@ class Profile:
                     self._posts.append(post)
                 if 'friend_username' in obj:
                     self.friend_username = obj['friend_username']
-                f.close()
-            except Exception as ex:
-                raise DsuProfileError(ex)
+                file.close()
+            except Exception as exc:
+                raise DsuProfileError() from exc
         else:
             raise DsuFileError()
 
     def extract_for_directmessage(self, lis_of_objects):
+        """extract_for_directmessage."""
         for item in lis_of_objects:
             if item.recipient not in self.friend_username.keys():
                 self.add_friend_username(item.recipient)

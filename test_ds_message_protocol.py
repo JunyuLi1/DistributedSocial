@@ -5,12 +5,14 @@
 # Junyu Li
 # junyul24@uci.edu
 # 86676906
+"""Module for test ds protocol."""
 import unittest
 import socket
 import ds_protocol
 
 
 def simple_client(message, address='168.235.86.101', port=3021):
+    """simple client function."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
         client.connect((address, port))
         send = client.makefile('w')
@@ -29,22 +31,26 @@ class TestDSmessenger(unittest.TestCase):
         usertoken = '6e79a5fd-2b96-4c48-8ae5-938c8dbb0e54'
         entry = 'Hi from 10'
         username = 'VC1'
-        test_message = ds_protocol.send_direct_message(usertoken, entry, username)
-        returned_result = ds_protocol.extract_json(simple_client(test_message)).type
+        test_message = ds_protocol.send_direct_message(
+            usertoken, entry, username)
+        returned_result = \
+            ds_protocol.extract_json(simple_client(test_message)).type
         assert returned_result == 'ok'
 
     def test_request_new(self):
         """Test request_new protocol function."""
         usertoken = '54559cc3-334b-4fd2-ac4d-5dd0462c3f15'
         test_message = ds_protocol.request_unread_messages(usertoken)
-        returned_result = ds_protocol.extract_json(simple_client(test_message)).type
+        returned_result = \
+            ds_protocol.extract_json(simple_client(test_message)).type
         assert returned_result == 'ok'
 
     def test_request_all(self):
         """Test request_all protocol function."""
         usertoken = '54559cc3-334b-4fd2-ac4d-5dd0462c3f15'
         test_message = ds_protocol.request_all_messages(usertoken)
-        returned_result = ds_protocol.extract_json(simple_client(test_message)).type
+        returned_result = \
+            ds_protocol.extract_json(simple_client(test_message)).type
         assert returned_result == 'ok'
 
 

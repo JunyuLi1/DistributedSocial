@@ -12,7 +12,8 @@
 import json
 import time
 from collections import namedtuple
-DataTuple = namedtuple('DataTuple', ['response', 'type', 'message', 'token', 'messages'])
+DataTuple = namedtuple('DataTuple',
+                       ['response', 'type', 'message', 'token', 'messages'])
 
 
 def extract_json(json_msg: str) -> DataTuple:
@@ -64,7 +65,9 @@ def bio_action(useertoken, bio):
 def send_direct_message(usertoken, entry, username):
     """Send direct message to a user."""
     timestamp = time.time()
-    dic = {"token": usertoken, "directmessage": {"entry": entry, "recipient": username, "timestamp": timestamp}}
+    dic = {"token": usertoken,
+           "directmessage": {"entry": entry,
+                             "recipient": username, "timestamp": timestamp}}
     str1 = json.dumps(dic)
     return str1
 
@@ -77,6 +80,7 @@ def request_unread_messages(usertoken):
 
 
 def request_all_messages(usertoken):
+    """request_all_messages."""
     dic = {"token": usertoken, "directmessage": "all"}
     str1 = json.dumps(dic)
     return str1
