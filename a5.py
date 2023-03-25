@@ -43,7 +43,8 @@ class Body(tk.Frame):
         id = self.posts_tree.insert('', id, id, text=contact)
 
     def insert_user_message(self, message: str):
-        self.entry_editor.insert(1.0, message + '\n', 'entry-right')  # replaced tk.END
+        self.entry_editor.insert(1.0, message + '\n',
+                                 'entry-right')  # replaced tk.END
 
     def insert_contact_message(self, message: str):
         self.entry_editor.insert(1.0, message + '\n', 'entry-left')
@@ -69,7 +70,8 @@ class Body(tk.Frame):
                              expand=True, padx=5, pady=5)
 
         entry_frame = tk.Frame(master=self, bg="green", highlightthickness=2)
-        entry_frame.configure(highlightcolor='green', highlightbackground='green')
+        entry_frame.configure(highlightcolor='green',
+                              highlightbackground='green')
         entry_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
 
         editor_frame = tk.Frame(master=entry_frame, bg="red")
@@ -191,7 +193,8 @@ class MainApp(tk.Frame):
         # Hint: check how to use tk.simpledialog.askstring to retrieve
         # the name of the new contact, and then use one of the body
         # methods to add the contact to your contact list
-        name = tk.simpledialog.askstring(title="Input", prompt="Enter a username:")
+        name = tk.simpledialog.askstring(title="Input",
+                                         prompt="Enter a username:")
         if name is not None:
             self.body.insert_contact(name)
 
@@ -280,7 +283,6 @@ class MainApp(tk.Frame):
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
 
     def new_file(self):
-        # Open a file dialog to specify the file name and location to save the new file
         self.clear()
         file_path = filedialog.asksaveasfilename(defaultextension='.dsu')
         Path(file_path).touch()
@@ -299,7 +301,7 @@ class MainApp(tk.Frame):
 
     def open_file(self):
         self.clear()
-        file_path = filedialog.askopenfilename()  # open a file dialog to select a file
+        file_path = filedialog.askopenfilename()
         self.path = file_path
         if file_path:
             self.profile_obj.load_profile(file_path)
@@ -329,6 +331,43 @@ class MainApp(tk.Frame):
         self.body._contacts = []
 
 
+def show_popup():
+    new_window = tk.Toplevel()
+    new_window.title("Instruction")
+    new_window.geometry("500x500")
+    custom_font = ("Arial", 15)
+    popup_label = tk.Label(new_window, text="Instruction:", font=custom_font)
+    popup_label.pack(pady=20)
+    new_label = tk.Label(new_window, text="For this ICS 32 Distributed Social Messenger, you can chat with other people.\n"
+                                     "To use this media, you need open a file or create a file first by using button.\n"
+                                     "The close button is used to close the GUI.\n"
+                                     "Configure DS Server is used to set account or change account.\n")
+    new_label.pack()
+
+
+def show_exception():
+    new_window = tk.Toplevel()
+    new_window.title("Exception")
+    new_window.geometry("500x500")
+    custom_font = ("Arial", 15)
+    popup_label = tk.Label(new_window, text="Exception:", font=custom_font)
+    popup_label.pack(pady=20)
+    new_label = tk.Label(new_window, text="Cannot connect to server.\n"
+                                          "Please check your input for address, username, and password.")
+    new_label.pack()
+
+
+def show_file_exception():
+    new_window = tk.Toplevel()
+    new_window.title("Exception")
+    new_window.geometry("500x500")
+    custom_font = ("Arial", 15)
+    popup_label = tk.Label(new_window, text="Exception:", font=custom_font)
+    popup_label.pack(pady=20)
+    new_label = tk.Label(new_window, text="Invalid dsu file format.")
+    new_label.pack()
+
+
 if __name__ == '__main__':
     # All Tkinter programs start with a root window. We will name ours 'main'.
     main = ThemedTk(theme="clearlooks")
@@ -350,6 +389,7 @@ if __name__ == '__main__':
     # subclass Tk.Frame, since our root frame is main, we initialize
     # the class with it.
     app = MainApp(main)
+    app.after(100, show_popup)
 
     # When update is called, we finalize the states of all widgets that
     # have been configured within the root frame. Here, update ensures that
