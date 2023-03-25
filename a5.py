@@ -11,6 +11,7 @@ from tkinter import ttk, filedialog
 from tkinter import simpledialog
 import ds_messenger
 from pathlib import Path
+from tkinter import messagebox
 import Profile
 
 
@@ -221,6 +222,8 @@ class MainApp(tk.Frame):
         # You must configure and instantiate your
         # DirectMessenger instance after this line.
         self.direct_messenger = ds_messenger.DirectMessenger(self.server, self.username, self.password)
+        if self.direct_messenger.get_token() is False:
+            messagebox.showerror("Error", "Incorrect input for connecting server!")
         self.profile_obj.dsuserver = self.server
         self.profile_obj.username = self.username
         self.profile_obj.password = self.password
@@ -301,7 +304,12 @@ class MainApp(tk.Frame):
         file_path = filedialog.askopenfilename()
         self.path = file_path
         if file_path:
-            self.profile_obj.load_profile(file_path)
+            try:
+                self.profile_obj.load_profile(file_path)
+            except Profile.DsuFileError:
+                messagebox.showerror('Error', 'Invalid dsu file.')
+            except Profile.DsuProfileError:
+                messagebox.showerror('Error', 'Invalid dsu file.')
             result = self.profile_obj.friend_username.keys()
             for item in result:
                 self.body.insert_contact(item)
@@ -339,29 +347,6 @@ def show_popup():
                                      "To use this media, you need open a file or create a file first by using button.\n"
                                      "The close button is used to close the GUI.\n"
                                      "Configure DS Server is used to set account or change account.\n")
-    new_label.pack()
-
-
-def show_exception():
-    new_window = tk.Toplevel()
-    new_window.title("Exception")
-    new_window.geometry("500x500")
-    custom_font = ("Arial", 15)
-    popup_label = tk.Label(new_window, text="Exception:", font=custom_font)
-    popup_label.pack(pady=20)
-    new_label = tk.Label(new_window, text="Cannot connect to server.\n"
-                                          "Please check your input for address, username, and password.")
-    new_label.pack()
-
-
-def show_file_exception():
-    new_window = tk.Toplevel()
-    new_window.title("Exception")
-    new_window.geometry("500x500")
-    custom_font = ("Arial", 15)
-    popup_label = tk.Label(new_window, text="Exception:", font=custom_font)
-    popup_label.pack(pady=20)
-    new_label = tk.Label(new_window, text="Invalid dsu file format.")
     new_label.pack()
 
 
