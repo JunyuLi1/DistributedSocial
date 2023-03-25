@@ -11,7 +11,6 @@ from tkinter import ttk, filedialog
 from tkinter import simpledialog
 import ds_messenger
 from pathlib import Path
-from ttkthemes import ThemedTk
 import Profile
 
 
@@ -61,7 +60,7 @@ class Body(tk.Frame):
         self._contacts = []
 
     def _draw(self):
-        posts_frame = tk.Frame(master=self, width=250)
+        posts_frame = tk.Frame(master=self, width=250, bg='lightblue')
         posts_frame.pack(fill=tk.BOTH, side=tk.LEFT)
 
         self.posts_tree = ttk.Treeview(posts_frame)
@@ -69,9 +68,7 @@ class Body(tk.Frame):
         self.posts_tree.pack(fill=tk.BOTH, side=tk.TOP,
                              expand=True, padx=5, pady=5)
 
-        entry_frame = tk.Frame(master=self, bg="green", highlightthickness=2)
-        entry_frame.configure(highlightcolor='green',
-                              highlightbackground='green')
+        entry_frame = tk.Frame(master=self, bg="light green", highlightthickness=2)
         entry_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
 
         editor_frame = tk.Frame(master=entry_frame, bg="red")
@@ -83,11 +80,11 @@ class Body(tk.Frame):
         message_frame = tk.Frame(master=self, bg="yellow")
         message_frame.pack(fill=tk.BOTH, side=tk.TOP, expand=False)
 
-        self.message_editor = tk.Text(message_frame, width=0, height=5)
+        self.message_editor = tk.Text(message_frame, width=0, height=5, bg='light blue', fg='green')
         self.message_editor.pack(fill=tk.BOTH, side=tk.LEFT,
                                  expand=True, padx=0, pady=0)
 
-        self.entry_editor = tk.Text(editor_frame, width=0, height=5)
+        self.entry_editor = tk.Text(editor_frame, width=0, height=5, bg='light blue', fg='green')
         self.entry_editor.tag_configure('entry-right', justify='right')
         self.entry_editor.tag_configure('entry-left', justify='left')
         self.entry_editor.pack(fill=tk.BOTH, side=tk.LEFT,
@@ -370,7 +367,7 @@ def show_file_exception():
 
 if __name__ == '__main__':
     # All Tkinter programs start with a root window. We will name ours 'main'.
-    main = ThemedTk(theme="clearlooks")
+    main = tk.Tk()
 
     # 'title' assigns a text value to the Title Bar area of a window.
     main.title("ICS 32 Distributed Social Messenger")
