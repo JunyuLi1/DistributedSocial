@@ -1,6 +1,4 @@
-# test_ds_message_protocol.py.py for assignment 5 in ICS 32
-# Programming with Software Libraries in Python
-# Replace the following placeholders with your information.
+# test_ds_message_protocol.py.py
 
 # Junyu Li
 # junyul24@uci.edu

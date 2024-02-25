@@ -1,4 +1,4 @@
-ICS32 Assignment 5:Direct Messaging Chat
+Distributed Social
 
 Created by:
 Junyu Li

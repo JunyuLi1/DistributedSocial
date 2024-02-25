@@ -1,9 +1,7 @@
-# Starter code for assignment 5 in ICS 32
-# Programming with Software Libraries in Python
-# Replace the following placeholders with your information.
-
+# a5.py
 # Junyu Li
 # junyul24@uci.edu
+# junyul031030@gmail.com
 # 86676906
 """Module for running GUI"""
 import tkinter as tk
@@ -13,6 +11,9 @@ import ds_messenger
 from pathlib import Path
 from tkinter import messagebox
 import Profile
+import OpenWeather
+import LastFM
+import ds_client
 
 
 class Body(tk.Frame):
@@ -126,8 +127,6 @@ class Footer(tk.Frame):
     def _draw(self):
         """Draw"""
         save_button = tk.Button(master=self, text="Send", width=20)
-        # You must implement this.
-        # Here you must configure the button to bind its click to
         # the send_click() function.
         save_button.config(command=self.send_click)
         save_button.pack(fill=tk.BOTH, side=tk.RIGHT, padx=5, pady=5)
@@ -177,6 +176,52 @@ class NewContactDialog(tk.simpledialog.Dialog):
         self.user = self.username_entry.get()
         self.pwd = self.password_entry.get()
         self.server = self.server_entry.get()
+
+
+class PublishDialog(tk.simpledialog.Dialog):
+    def body(self, master):
+        self.title("Publish Message")
+        tk.Label(master, text="Enter your message:").pack()
+        self.text_input = tk.Text(master, height=10, width=50)
+        self.text_input.pack()
+        return self.text_input
+
+    def apply(self):
+        self.result = self.text_input.get("1.0", tk.END).strip()
+
+
+class WeatherInputDialog(tk.simpledialog.Dialog):
+    def body(self, master):
+        self.title("Weather")
+        self.zipcode_label = tk.Label(master, width=30, text="Zipcode:")
+        self.zipcode_label.pack()
+        self.zipcode_input = tk.Entry(master, width=30)
+        self.zipcode_input.pack()
+        self.country_code_label = tk.Label(master, width=30, text="Country Code:")
+        self.country_code_label.pack()
+        self.country_code_input = tk.Entry(master, width=30)
+        self.country_code_input.pack()
+        self.apikey_label = tk.Label(master, width=30, text="API Key:")
+        self.apikey_label.pack()
+        self.apikey_input = tk.Entry(master, width=30)
+        self.apikey_input.pack()
+
+    def apply(self):
+        self.zipcode = self.zipcode_input.get()
+        self.country_code = self.country_code_input.get()
+        self.apikey = self.apikey_input.get()
+
+
+class LastFMInputDialog(tk.simpledialog.Dialog):
+    def body(self, master):
+        self.title("LastFM")
+        tk.Label(master, text="Enter your API:").pack()
+        self.text_input = tk.Text(master, height=10, width=50)
+        self.text_input.pack()
+        return self.text_input
+
+    def apply(self):
+        self.apikey = self.text_input.get("1.0", tk.END).strip()
 
 
 class MainApp(tk.Frame):
@@ -266,6 +311,32 @@ class MainApp(tk.Frame):
         self.profile_obj.save_profile(self.path)
         self.check_new()
 
+    def post_online(self):
+        dialog = PublishDialog(self)
+        message = dialog.result
+        if '@weather' in message:
+            weather_dialog = WeatherInputDialog(self)
+            zipcode = weather_dialog.zipcode
+            country_code = weather_dialog.country_code
+            apikey = weather_dialog.apikey
+            open_weather = OpenWeather.OpenWeather(zipcode, country_code)
+            open_weather.set_apikey(apikey)
+            open_weather.load_data()
+            message = open_weather.transclude(message)
+        if '@lastfm' in message:
+            last_fm = LastFM.LastFM()
+            lastfm_dialog = LastFMInputDialog(self)
+            user_input = lastfm_dialog.apikey
+            last_fm.set_apikey(user_input)
+            last_fm.load_data()
+            message = last_fm.transclude(message)
+        self.profile_obj.load_profile(self.path)
+        newpost = Profile.Post(entry=message)
+        self.profile_obj.add_post(newpost)
+        self.profile_obj.save_profile(self.path)
+        ds_client.send(self.server, 3021, self.username, self.password, message)
+
+
     def publish(self, message: str):
         """Publish"""
         # You must implement this!
@@ -312,6 +383,11 @@ class MainApp(tk.Frame):
         self.body.pack(fill=tk.BOTH, side=tk.TOP, expand=True)
         self.footer = Footer(self.root, send_callback=self.send_message)
         self.footer.pack(fill=tk.BOTH, side=tk.BOTTOM)
+
+        publish_menu = tk.Menu(menu_bar)
+        menu_bar.add_cascade(menu=publish_menu, label='Publish')
+        publish_menu.add_command(label='Post Online',
+                                  command=self.post_online)
 
     def new_file(self):
         """create a new file."""
@@ -382,8 +458,8 @@ def show_popup():
     popup_label.pack(pady=20)
     new_label = tk.Label(
         new_window,
-        text="For this ICS 32 Distributed Social Messenger, "
-             "you can chat with other people.\n")
+        text="For this Distributed Social Messenger, "
+             "you can chat with other people or publish a post online.\n")
     new_label.pack()
     new_label = tk.Label(
         new_window,
@@ -400,38 +476,14 @@ def show_popup():
 
 
 if __name__ == '__main__':
-    # All Tkinter programs start with a root window. We will name ours 'main'.
     main = tk.Tk()
-
-    # 'title' assigns a text value to the Title Bar area of a window.
-    main.title("ICS 32 Distributed Social Messenger")
-
-    # This is just an arbitrary starting point. You can change the value
-    # around to see how the starting size of the window changes.
+    main.title("Distributed Social Messenger")
     main.geometry("720x480")
-
-    # adding this option removes some legacy behavior with menus that
-    # some modern OSes don't support. If you're curious, feel free to comment
-    # out and see how the menu changes.
     main.option_add('*tearOff', False)
-
-    # Initialize the MainApp class, which is the starting point for the
-    # widgets used in the program. All of the classes that we use,
-    # subclass Tk.Frame, since our root frame is main, we initialize
-    # the class with it.
     app = MainApp(main)
     app.after(100, show_popup)
-
-    # When update is called, we finalize the states of all widgets that
-    # have been configured within the root frame. Here, update ensures that
-    # we get an accurate width and height reading based on the types of widgets
-    # we have used. minsize prevents the root window from resizing too small.
-    # Feel free to comment it out and see how the resizing
-    # behavior of the window changes.
     main.update()
     main.minsize(main.winfo_width(), main.winfo_height())
     id = main.after(2000, app.check_new)
     print(id)
-    # And finally, start up the event loop for the program (you can find
-    # more on this in lectures of week 9 and 10).
     main.mainloop()
